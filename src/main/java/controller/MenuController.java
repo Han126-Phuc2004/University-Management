@@ -488,7 +488,7 @@ public class MenuController {
 
         // Kiểm tra khóa học đã đầy chưa
         if (courseService.isCourseFull(courseId)) {
-            System.out.println("⚠️  KHÓA HỌC ĐÃ ĐẦY!");
+            System.out.println("KHÓA HỌC ĐÃ ĐẦY!");
             System.out.println("Khóa học '" + course.getCourseName() + "' đã đầy (" + 
                              course.getEnrolledStudents() + "/" + course.getMaxStudents() + " sinh viên).");
             System.out.println("Không thể mô phỏng đăng ký hay đăng ký thêm, vui lòng chọn khóa khác.");
