@@ -3,10 +3,7 @@ package controller;
 import service.StudentService;
 import service.LecturerService;
 import service.CourseService;
-//import service.EnrollmentService;
 import util.DBConnection;
-
-import java.util.List;
 
 import java.util.Scanner;
 
@@ -18,7 +15,6 @@ public class MenuController {
     private StudentService studentService;
     private LecturerService lecturerService;
     private CourseService courseService;
-    //    private EnrollmentService enrollmentService;
     private Scanner scanner;
     private boolean isRunning;
 
@@ -26,7 +22,6 @@ public class MenuController {
         this.studentService = new StudentService();
         this.lecturerService = new LecturerService();
         this.courseService = new CourseService();
-//        this.enrollmentService = new EnrollmentService();
         this.scanner = new Scanner(System.in);
         this.isRunning = true;
     }
@@ -63,10 +58,9 @@ public class MenuController {
         System.out.println("5. Báo cáo và Thống kê");
         System.out.println("6. Đọc dữ liệu từ file CSV");
         System.out.println("7. Lưu dữ liệu ra file CSV");
-        System.out.println("8. Mô phỏng đăng ký đa luồng");
         System.out.println("0. Thoát chương trình");
         System.out.println("=".repeat(50));
-        System.out.print("Vui lòng chọn chức năng (0-8): ");
+        System.out.print("Vui lòng chọn chức năng (0-7): ");
     }
 
     /**
@@ -86,26 +80,14 @@ public class MenuController {
                 case 3:
                     handleCourseMenu();
                     break;
-//                case 4:
-//                    handleEnrollmentMenu();
-//                    break;
-//                case 5:
-//                    handleReportMenu();
-//                    break;
                 case 6:
                     handleImportData();
-                    break;
-//                case 7:
-//                    handleExportData();
-//                    break;
-                case 8:
-                    handleSimulationMenu();
                     break;
                 case 0:
                     isRunning = false;
                     break;
                 default:
-                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn từ 0-8.");
+                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn từ 0-7.");
             }
         } catch (NumberFormatException e) {
             System.out.println("Vui lòng nhập số nguyên!");
@@ -163,7 +145,7 @@ public class MenuController {
         }
     }
 
-    /**
+    /*
      * Xử lý menu quản lý giảng viên
      */
     private void handleLecturerMenu() {
@@ -264,66 +246,6 @@ public class MenuController {
         }
     }
 
-    //
-//    /**
-//     * Xử lý menu quản lý đăng ký môn học
-//     */
-//    private void handleEnrollmentMenu() {
-//        while (true) {
-//            System.out.println("\n" + "=".repeat(40));
-//            System.out.println("   QUẢN LÝ ĐĂNG KÝ MÔN HỌC");
-//            System.out.println("=".repeat(40));
-//            System.out.println("1. Đăng ký môn học cho sinh viên");
-//            System.out.println("2. Hủy đăng ký môn học");
-//            System.out.println("3. Cập nhật điểm số");
-//            System.out.println("4. Xem danh sách đăng ký của sinh viên");
-//            System.out.println("5. Xem danh sách sinh viên trong khóa học");
-//            System.out.println("6. Xem tất cả đăng ký");
-//            System.out.println("0. Quay lại menu chính");
-//            System.out.println("=".repeat(40));
-//            System.out.print("Vui lòng chọn chức năng (0-6): ");
-//
-//            try {
-//                int choice = Integer.parseInt(scanner.nextLine());
-//
-//                switch (choice) {
-//                    case 1:
-//                        enrollmentService.enrollStudent();
-//                        break;
-//                    case 2:
-//                        enrollmentService.dropEnrollment();
-//                        break;
-//                    case 3:
-//                        enrollmentService.updateScores();
-//                        break;
-//                    case 4:
-//                        enrollmentService.viewStudentEnrollments();
-//                        break;
-//                    case 5:
-//                        enrollmentService.viewCourseStudents();
-//                        break;
-//                    case 6:
-//                        enrollmentService.viewAllEnrollments();
-//                        break;
-//                    case 0:
-//                        return;
-//                    default:
-//                        System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn từ 0-6.");
-//                }
-//            } catch (NumberFormatException e) {
-//                System.out.println("Vui lòng nhập số nguyên!");
-//            }
-//        }
-//    }
-//
-//    /**
-//     * Xử lý menu báo cáo
-//     */
-    private void handleReportMenu() {
-        ReportController reportController = new ReportController();
-        reportController.showReportMenu();
-    }
-
     /**
      * Xử lý import dữ liệu từ CSV
      */
@@ -331,170 +253,10 @@ public class MenuController {
         System.out.println("\n" + "=".repeat(50));
         System.out.println("        ĐỌC DỮ LIỆU TỪ FILE CSV");
         System.out.println("=".repeat(50));
-        
-        try {
-            // Import sinh viên
-            System.out.println("Đang đọc dữ liệu sinh viên...");
-            List<entity.Student> students = repository.ReadStudentFile.loadStudents();
-            System.out.println("Đã đọc " + students.size() + " sinh viên");
-            
-            // Import giảng viên
-            System.out.println("Đang đọc dữ liệu giảng viên...");
-            List<entity.Lecturer> lecturers = repository.ReadLectureFile.loadLecturers();
-            System.out.println("Đã đọc " + lecturers.size() + " giảng viên");
-            
-            // Import khóa học
-            System.out.println("Đang đọc dữ liệu khóa học...");
-            String coursePath = System.getProperty("user.dir") + "/data/courses.csv";
-            List<String[]> courseData = util.FileUtils.readCSV(coursePath);
-            List<entity.Course> courses = repository.ReadCourseFile.parseCourses(courseData);
-            System.out.println("Đã đọc " + courses.size() + " khóa học");
-            
-            // Hiển thị thống kê
-            System.out.println("\n" + "=".repeat(50));
-            System.out.println("           THỐNG KÊ DỮ LIỆU");
-            System.out.println("=".repeat(50));
-            System.out.println("Tổng số sinh viên: " + students.size());
-            System.out.println("Tổng số giảng viên: " + lecturers.size());
-            System.out.println("Tổng số khóa học: " + courses.size());
-            
-            // Hiển thị mẫu dữ liệu
-            if (!students.isEmpty()) {
-                System.out.println("\nMẫu dữ liệu sinh viên:");
-                students.stream().limit(3).forEach(s -> 
-                    System.out.println("  • " + s.getFullName() + " (ID: " + s.getStudentId() + ", GPA: " + s.getGpa() + ")")
-                );
-            }
-            
-            if (!lecturers.isEmpty()) {
-                System.out.println("\nMẫu dữ liệu giảng viên:");
-                lecturers.stream().limit(3).forEach(l -> 
-                    System.out.println("  • " + l.getFullName() + " (" + l.getDegree() + ")")
-                );
-            }
-            
-            if (!courses.isEmpty()) {
-                System.out.println("\nMẫu dữ liệu khóa học:");
-                courses.stream().limit(3).forEach(c -> 
-                    System.out.println("  • " + c.getCourseName() + " (ID: " + c.getCourseId() + ", " + c.getCredits() + " tín chỉ)")
-                );
-            }
-            
-            System.out.println("\nHoàn thành đọc dữ liệu từ CSV!");
-            System.out.println("Lưu ý: Dữ liệu đã được đọc vào bộ nhớ. Để lưu vào database, hãy sử dụng các chức năng thêm dữ liệu thủ công.");
-            
-        } catch (Exception e) {
-            System.err.println("Lỗi khi đọc dữ liệu CSV: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        System.out.println("\nNhấn Enter để quay lại menu chính...");
-        try {
-            scanner.nextLine();
-        } catch (Exception e) {
-            // Ignore input errors
-        }
-    }
 
-    /**
-     * Xử lý menu mô phỏng đăng ký đa luồng
-     */
-    private void handleSimulationMenu() {
-        System.out.println("\n=== MÔ PHỎNG ĐĂNG KÝ ĐA LUỒNG ===");
-        
-        // Hiển thị danh sách khóa học có sẵn
-        System.out.println("Danh sách khóa học có sẵn:");
-        courseService.listAllCourses();
-        
-        System.out.print("\nNhập mã khóa học để mô phỏng: ");
-        String courseId = scanner.nextLine();
-        
-        if (courseId.trim().isEmpty()) {
-            System.out.println("Mã khóa học không được để trống!");
-            return;
-        }
-        
-        // Kiểm tra khóa học có tồn tại không
-        entity.Course course = courseService.getCourseById(courseId);
-        if (course == null) {
-            System.out.println("Không tìm thấy khóa học với mã: " + courseId);
-            return;
-        }
-        
-        System.out.print("Nhập số lượng sinh viên mô phỏng (mặc định 5): ");
-        String numStudentsStr = scanner.nextLine();
-        int numStudents = 5;
-        if (!numStudentsStr.trim().isEmpty()) {
-            try {
-                numStudents = Integer.parseInt(numStudentsStr);
-                if (numStudents <= 0) {
-                    System.out.println("Số lượng sinh viên phải lớn hơn 0!");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Số lượng không hợp lệ, sử dụng mặc định 5.");
-            }
-        }
-        
-        // Chạy mô phỏng
-        runSimulation(courseId, numStudents);
-    }
-    
-    /**
-     * Chạy mô phỏng đăng ký đa luồng
-     */
-    private void runSimulation(String courseId, int numStudents) {
-        System.out.println("\n=== BẮT ĐẦU MÔ PHỎNG ===");
-        System.out.println("Khóa học: " + courseService.getCourseById(courseId).getCourseName());
-        System.out.println("Mã khóa học: " + courseId);
-        System.out.println("Số sinh viên mô phỏng: " + numStudents);
-        System.out.println("------------------------------------");
-        
-        java.util.List<Thread> threads = new java.util.ArrayList<>();
-        java.util.List<String> results = new java.util.ArrayList<>();
-        
-        for (int i = 0; i < numStudents; i++) {
-            String studentName = "SinhVien_" + (i + 1);
-            Thread thread = new Thread(() -> {
-                System.out.printf("Người dùng '%s' đang cố gắng đăng ký môn học.%n", studentName);
-                String result = courseService.registerStudent(courseId, studentName);
-                synchronized (results) {
-                    results.add(studentName + ": " + result);
-                }
-            });
-            threads.add(thread);
-            thread.start();
-        }
-        
-        // Đợi tất cả threads hoàn thành
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                System.err.println("Lỗi khi đợi thread: " + e.getMessage());
-            }
-        }
-        
-        // Hiển thị kết quả
-        System.out.println("\n------------------------------------");
-        System.out.println("KẾT QUẢ MÔ PHỎNG:");
-        for (String result : results) {
-            System.out.println("  " + result);
-        }
-        
-        // Hiển thị trạng thái cuối cùng - sử dụng CourseService để lấy dữ liệu
-        try {
-            entity.Course finalCourse = courseService.getCourseById(courseId);
-            if (finalCourse != null) {
-                System.out.println("\nTrạng thái cuối cùng:");
-                System.out.printf("  Số sinh viên đã đăng ký: %d/%d%n", 
-                    finalCourse.getEnrolledStudents(), finalCourse.getMaxStudents());
-                System.out.printf("  Danh sách sinh viên: %s%n", finalCourse.getRegisteredStudents());
-            }
-        } catch (Exception e) {
-            System.err.println("Lỗi khi lấy trạng thái cuối cùng: " + e.getMessage());
-        }
-        
+        System.out.println("Chức năng này chưa được triển khai do thiếu các lớp repository.ReadStudentFile, repository.ReadLectureFile, repository.ReadCourseFile, và util.FileUtils.");
+        System.out.println("Vui lòng triển khai các lớp này để hỗ trợ đọc dữ liệu từ CSV.");
+
         System.out.println("\nNhấn Enter để quay lại menu chính...");
         scanner.nextLine();
     }

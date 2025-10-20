@@ -3,18 +3,18 @@ package entity;
 import java.time.LocalDate;
 
 /**
-
+ *
  */
 public class Lecturer {
-    private String lecturerId;          
-    private String fullName;             
-    private LocalDate dateOfBirth;       
-    private String gender;               
-    private String phone;               
-    private String email;                
-    private String departmentId;         
-    private String degree;               
-    private String specialization;     
+    private String lecturerId;
+    private String fullName;
+    private LocalDate dateOfBirth;
+    private String gender;
+    private String phone;
+    private String email;
+    private String departmentId;
+    private String degree;
+    private String specialization;
 
     public Lecturer() {
     }
@@ -110,4 +110,5 @@ public class Lecturer {
     public void setSpecialization(String specialization) {
         this.specialization = specialization;
     }
+
 }

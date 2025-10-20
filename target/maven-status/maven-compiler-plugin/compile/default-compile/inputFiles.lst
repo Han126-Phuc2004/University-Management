@@ -1,12 +1,9 @@
-C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\ReportDemo.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\repository\CourseRepository.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\service\StudentService.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\entity\Lecturer.java
-C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\util\FileUtils.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\util\DBConnection.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\entity\Course.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\entity\Enroll.java
-C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\repository\ReadCourseFile.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\service\EnrollmentService.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\service\LecturerService.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\util\InputValidator.java
@@ -17,6 +14,4 @@ C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\controller\ReportController.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\entity\Student.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\controller\MenuController.java
-C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\repository\ReadLectureFile.java
-C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\repository\ReadStudentFile.java
 C:\Users\han12\Downloads\UniversityManagement (2)\UniversityManagement\src\main\java\repository\EnrollmentRepository.java

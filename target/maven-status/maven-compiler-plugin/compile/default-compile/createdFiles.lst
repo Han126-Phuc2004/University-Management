@@ -1,7 +1,5 @@
 entity\Course.class
 util\InputValidator.class
-util\FileUtils.class
-repository\ReadLectureFile.class
 service\StudentService.class
 service\CourseService.class
 controller\ReportController.class
@@ -9,12 +7,9 @@ main\java\Main.class
 util\DBConnection.class
 entity\Student.class
 entity\Lecturer.class
-repository\ReadCourseFile.class
 repository\StudentRepository.class
-ReportDemo.class
 repository\CourseRepository.class
 controller\MenuController.class
 repository\LecturerRepository.class
 entity\Enroll.class
-repository\ReadStudentFile.class
 service\LecturerService.class
