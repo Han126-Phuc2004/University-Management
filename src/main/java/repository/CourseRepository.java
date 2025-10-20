@@ -2,6 +2,7 @@ package repository;
 
 import entity.Course;
 import util.DBConnection;
+import repository.ReadCourseFile;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -313,6 +314,52 @@ System.err.println("Lỗi khi tìm khóa học theo giảng viên: " + e.getMess
                 rs.getInt("max_students"),
                 rs.getInt("enrolled_students")
         );
+    }
+
+    /**
+     * Kiểm tra xem course_id đã tồn tại trong database chưa
+     */
+    public boolean existsById(String courseId) {
+        String sql = "SELECT COUNT(*) FROM course WHERE course_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, courseId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // true nếu có ít nhất 1 bản ghi
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Đọc file CSV và lưu toàn bộ khóa học vào DB
+     */
+    public void saveCourseFromCSVToBD(String filePath) {
+        List<Course> courses = ReadCourseFile.loadCoursesFromCSV(filePath);
+        int successCount = 0;
+        int skippedCount = 0;
+
+        for (Course course : courses) {
+            // Nếu trùng ID → bỏ qua
+            if (existsById(course.getCourseId())) {
+                System.out.println("Bỏ qua: Course ID " + course.getCourseId() + " đã tồn tại trong DB.");
+                skippedCount++;
+                continue;
+            }
+
+            // Thêm mới nếu chưa tồn tại
+            if (addCourse(course)) {
+                successCount++;
+            }
+        }
+
+        System.out.println("Import hoàn tất!");
+        System.out.println(" - Thêm mới: " + successCount + " khóa học");
+        System.out.println(" - Bỏ qua (đã tồn tại): " + skippedCount + " khóa học");
+        System.out.println(" - Tổng số dòng trong CSV: " + courses.size());
     }
 
     public static void main(String[] args) {

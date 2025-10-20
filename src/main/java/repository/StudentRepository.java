@@ -2,6 +2,7 @@ package repository;
 
 import entity.Student;
 import util.DBConnection;
+import repository.ReadStudentFile;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -178,5 +179,48 @@ public class StudentRepository {
         student.setEnrollmentDate(rs.getDate("enrollment_date").toLocalDate());
         student.setGpa(rs.getDouble("gpa"));
         return student;
+    }
+
+    /**
+     * Kiểm tra xem student_id đã tồn tại trong database chưa
+     */
+    public boolean existsById(String studentId) {
+        String sql = "SELECT COUNT(*) FROM student WHERE student_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // true nếu có ít nhất 1 bản ghi
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public void saveStudentFromCSVToBD(String filePath) {
+        List<Student> students = ReadStudentFile.loadStudents(filePath);
+        int successCount = 0;
+        int skippedCount = 0;
+
+        for (Student student : students) {
+            // Nếu trùng ID → bỏ qua
+            if (existsById(student.getStudentId())) {
+                System.out.println("Bỏ qua: Student ID " + student.getStudentId() + " đã tồn tại trong DB.");
+                skippedCount++;
+                continue;
+            }
+
+            // Thêm mới nếu chưa tồn tại
+            if (addStudent(student)) {
+                successCount++;
+            }
+        }
+
+        System.out.println("Import hoàn tất!");
+        System.out.println(" - Thêm mới: " + successCount + " sinh viên");
+        System.out.println(" - Bỏ qua (đã tồn tại): " + skippedCount + " sinh viên");
+        System.out.println(" - Tổng số dòng trong CSV: " + students.size());
     }
 }

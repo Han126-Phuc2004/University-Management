@@ -2,6 +2,7 @@ package repository;
 
 import entity.Lecturer;
 import util.DBConnection;
+import repository.ReadLectureFile;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -137,5 +138,31 @@ public class LecturerRepository {
         l.setDegree(rs.getString("degree"));
         l.setSpecialization(rs.getString("specialization"));
         return l;
+    }
+
+
+    public void saveLecturerFromCSVToBD(String filePath) {
+        List<Lecturer> lecturers = ReadLectureFile.loadLecturersFromCSV(filePath);
+        int successCount = 0;
+        int skippedCount = 0;
+
+        for (Lecturer lecturer : lecturers) {
+            // Nếu trùng ID → bỏ qua
+            if (existsById(lecturer.getLecturerId())) {
+                System.out.println("Bỏ qua: Lecturer ID " + lecturer.getLecturerId() + " đã tồn tại trong DB.");
+                skippedCount++;
+                continue;
+            }
+
+            // Thêm mới nếu chưa tồn tại
+            if (addLecturer(lecturer)) {
+                successCount++;
+            }
+        }
+
+        System.out.println("Import hoàn tất!");
+        System.out.println(" - Thêm mới: " + successCount + " giảng viên");
+        System.out.println(" - Bỏ qua (đã tồn tại): " + skippedCount + " giảng viên");
+        System.out.println(" - Tổng số dòng trong CSV: " + lecturers.size());
     }
 }

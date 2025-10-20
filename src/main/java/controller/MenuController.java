@@ -4,6 +4,11 @@ import service.StudentService;
 import service.LecturerService;
 import service.CourseService;
 import util.DBConnection;
+import util.FileUtils;
+import repository.StudentRepository;
+import repository.LecturerRepository;
+import repository.CourseRepository;
+/*import controller.ReportController;*/
 
 import java.util.Scanner;
 
@@ -80,6 +85,12 @@ public class MenuController {
                 case 3:
                     handleCourseMenu();
                     break;
+               // case 4:
+                  //  handleEnrollmentMenu();
+                   // break;
+               // case 5:
+                  //  handleReportMenu();
+                  //  break;
                 case 6:
                     handleImportData();
                     break;
@@ -87,7 +98,7 @@ public class MenuController {
                     isRunning = false;
                     break;
                 default:
-                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn từ 0-7.");
+                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn từ 0-6.");
             }
         } catch (NumberFormatException e) {
             System.out.println("Vui lòng nhập số nguyên!");
@@ -250,13 +261,191 @@ public class MenuController {
      * Xử lý import dữ liệu từ CSV
      */
     private void handleImportData() {
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("        ĐỌC DỮ LIỆU TỪ FILE CSV");
-        System.out.println("=".repeat(50));
+        while (true) {
+            System.out.println("\n" + "=".repeat(40));
+            System.out.println("      IMPORT DỮ LIỆU TỪ CSV");
+            System.out.println("=".repeat(40));
+            System.out.println("1. Import sinh viên (students.csv)");
+            System.out.println("2. Import giảng viên (lecturers.csv)");
+            System.out.println("3. Import khóa học (courses.csv)");
+            System.out.println("4. Import tất cả (Students, Lecturers, Courses)");
+            System.out.println("0. Quay lại menu chính");
+            System.out.println("=".repeat(40));
+            System.out.print("Vui lòng chọn chức năng (0-4): ");
 
-        System.out.println("Chức năng này chưa được triển khai do thiếu các lớp repository.ReadStudentFile, repository.ReadLectureFile, repository.ReadCourseFile, và util.FileUtils.");
-        System.out.println("Vui lòng triển khai các lớp này để hỗ trợ đọc dữ liệu từ CSV.");
+            String choiceStr = scanner.nextLine();
+            int choice;
+            try {
+                choice = Integer.parseInt(choiceStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Vui lòng nhập số nguyên!");
+                continue;
+            }
 
+            // Xác định đường dẫn mặc định tới thư mục data
+            String baseDir = System.getProperty("user.dir");
+            String studentCsv = baseDir + "/data/students.csv";
+            String lecturerCsv = baseDir + "/data/lecturers.csv";
+            String courseCsv = baseDir + "/data/courses.csv";
+
+            switch (choice) {
+                case 1: {
+                    System.out.println("\n=== IMPORT STUDENTS ===");
+                    if (!FileUtils.fileExists(studentCsv)) {
+                        System.out.println("Không tìm thấy file: " + studentCsv);
+                        break;
+                    }
+                    new StudentRepository().saveStudentFromCSVToBD(studentCsv);
+                    break;
+                }
+                case 2: {
+                    System.out.println("\n=== IMPORT LECTURERS ===");
+                    if (!FileUtils.fileExists(lecturerCsv)) {
+                        System.out.println("Không tìm thấy file: " + lecturerCsv);
+                        break;
+                    }
+                    new LecturerRepository().saveLecturerFromCSVToBD(lecturerCsv);
+                    break;
+                }
+                case 3: {
+                    System.out.println("\n=== IMPORT COURSES ===");
+                    if (!FileUtils.fileExists(courseCsv)) {
+                        System.out.println("Không tìm thấy file: " + courseCsv);
+                        break;
+                    }
+                    new CourseRepository().saveCourseFromCSVToBD(courseCsv);
+                    break;
+                }
+                case 4: {
+                    System.out.println("\n=== IMPORT ALL (Students, Lecturers, Courses) ===");
+                    boolean hasAny = false;
+                    if (FileUtils.fileExists(studentCsv)) {
+                        new StudentRepository().saveStudentFromCSVToBD(studentCsv);
+                        hasAny = true;
+                    } else {
+                        System.out.println("Không tìm thấy file: " + studentCsv);
+                    }
+                    if (FileUtils.fileExists(lecturerCsv)) {
+                        new LecturerRepository().saveLecturerFromCSVToBD(lecturerCsv);
+                        hasAny = true;
+                    } else {
+                        System.out.println("Không tìm thấy file: " + lecturerCsv);
+                    }
+                    if (FileUtils.fileExists(courseCsv)) {
+                        new CourseRepository().saveCourseFromCSVToBD(courseCsv);
+                        hasAny = true;
+                    } else {
+                        System.out.println("Không tìm thấy file: " + courseCsv);
+                    }
+                    if (!hasAny) {
+                        System.out.println("Không có file CSV nào để import trong thư mục data.");
+                    }
+                    break;
+                }
+                case 0:
+                    return;
+                default:
+                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn từ 0-4.");
+            }
+        }
+    }
+
+    /**
+     * Xử lý menu quản lý đăng ký môn học
+     */
+    private void handleEnrollmentMenu() {
+        System.out.println("\n" + "=".repeat(40));
+        System.out.println("   QUẢN LÝ ĐĂNG KÝ MÔN HỌC");
+        System.out.println("=".repeat(40));
+        System.out.println("Chức năng này đang được phát triển...");
+        System.out.println("Nhấn Enter để quay lại menu chính...");
+        scanner.nextLine();
+    }
+
+    /**
+     * Xử lý menu báo cáo
+     */
+    private void handleReportMenu() {
+        System.out.println("\n" + "=".repeat(40));
+        System.out.println("      BÁO CÁO VÀ THỐNG KÊ");
+        System.out.println("=".repeat(40));
+        System.out.println("1. Thống kê sinh viên theo khoa");
+        System.out.println("2. Thống kê khóa học theo giảng viên");
+        System.out.println("3. Thống kê điểm trung bình");
+        System.out.println("4. Báo cáo tổng quan");
+        System.out.println("0. Quay lại menu chính");
+        System.out.println("=".repeat(40));
+        System.out.print("Vui lòng chọn chức năng (0-4): ");
+
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            switch (choice) {
+                case 1:
+                    System.out.println("Thống kê sinh viên theo khoa - Đang phát triển...");
+                    break;
+                case 2:
+                    System.out.println("Thống kê khóa học theo giảng viên - Đang phát triển...");
+                    break;
+                case 3:
+                    System.out.println("Thống kê điểm trung bình - Đang phát triển...");
+                    break;
+                case 4:
+                    System.out.println("Báo cáo tổng quan - Đang phát triển...");
+                    break;
+                case 0:
+                    return;
+                default:
+                    System.out.println("Lựa chọn không hợp lệ!");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Vui lòng nhập số nguyên!");
+        }
+        
+        System.out.println("\nNhấn Enter để quay lại menu chính...");
+        scanner.nextLine();
+    }
+
+    /**
+     * Xử lý export dữ liệu ra CSV
+     */
+    private void handleExportData() {
+        System.out.println("\n" + "=".repeat(40));
+        System.out.println("      EXPORT DỮ LIỆU RA CSV");
+        System.out.println("=".repeat(40));
+        System.out.println("1. Export sinh viên");
+        System.out.println("2. Export giảng viên");
+        System.out.println("3. Export khóa học");
+        System.out.println("4. Export tất cả");
+        System.out.println("0. Quay lại menu chính");
+        System.out.println("=".repeat(40));
+        System.out.print("Vui lòng chọn chức năng (0-4): ");
+
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            String baseDir = System.getProperty("user.dir") + "/data/export/";
+            
+            switch (choice) {
+                case 1:
+                    System.out.println("Export sinh viên - Đang phát triển...");
+                    break;
+                case 2:
+                    System.out.println("Export giảng viên - Đang phát triển...");
+                    break;
+                case 3:
+                    System.out.println("Export khóa học - Đang phát triển...");
+                    break;
+                case 4:
+                    System.out.println("Export tất cả - Đang phát triển...");
+                    break;
+                case 0:
+                    return;
+                default:
+                    System.out.println("Lựa chọn không hợp lệ!");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Vui lòng nhập số nguyên!");
+        }
+        
         System.out.println("\nNhấn Enter để quay lại menu chính...");
         scanner.nextLine();
     }
