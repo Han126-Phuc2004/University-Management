@@ -1,0 +1,182 @@
+package repository;
+
+import entity.Student;
+import util.DBConnection;
+
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+public class StudentRepository {
+    private Connection connection;
+
+    public StudentRepository() {
+        this.connection = DBConnection.getConnection();
+    }
+
+    public List<String> getDepartment() {
+        List<String> departments = new ArrayList<>();
+        String sql = "SELECT department_name FROM department";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                departments.add(rs.getString("department_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return departments;
+    }
+
+    public String getDepartmentIdByName(String name) {
+        String sql = "SELECT department_id FROM department WHERE department_name = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("department_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getDepartmentNameById(String id) {
+        if (id == null) return null;
+        String sql = "SELECT department_name FROM department WHERE department_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("department_name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean addStudent(Student student) {
+        String sql = "INSERT INTO student (student_id, full_name, date_of_birth, gender, phone, email, department_id, enrollment_date, gpa) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, student.getStudentId());
+            pstmt.setString(2, student.getFullName());
+            pstmt.setDate(3, Date.valueOf(student.getDateOfBirth()));
+            pstmt.setString(4, student.getGender());
+            pstmt.setString(5, student.getPhone());
+            pstmt.setString(6, student.getEmail());
+            if (student.getDepartmentId() != null) {
+                pstmt.setString(7, student.getDepartmentId());
+            } else {
+                pstmt.setNull(7, Types.VARCHAR);
+            }
+            pstmt.setDate(8, Date.valueOf(student.getEnrollmentDate()));
+            pstmt.setDouble(9, student.getGpa());
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public Student findById(String id) {
+        String sql = "SELECT * FROM student WHERE student_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapToStudent(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updateStudent(Student student) {
+        String sql = "UPDATE student SET full_name = ?, date_of_birth = ?, gender = ?, phone = ?, email = ?, " +
+                "department_id = ?, gpa = ? WHERE student_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, student.getFullName());
+            pstmt.setDate(2, Date.valueOf(student.getDateOfBirth()));
+            pstmt.setString(3, student.getGender());
+            pstmt.setString(4, student.getPhone());
+            pstmt.setString(5, student.getEmail());
+            if (student.getDepartmentId() != null) {
+                pstmt.setString(6, student.getDepartmentId());
+            } else {
+                pstmt.setNull(6, Types.VARCHAR);
+            }
+            pstmt.setDouble(7, student.getGpa());
+            pstmt.setString(8, student.getStudentId());
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean deleteStudent(String id) {
+        String sql = "DELETE FROM student WHERE student_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public List<Student> findAll() {
+        List<Student> students = new ArrayList<>();
+        String sql = "SELECT * FROM student";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                students.add(mapToStudent(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return students;
+    }
+
+    public List<Student> findByName(String name) {
+        List<Student> students = new ArrayList<>();
+        String sql = "SELECT * FROM student WHERE full_name LIKE ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, "%" + name + "%");
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    students.add(mapToStudent(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return students;
+    }
+
+    private Student mapToStudent(ResultSet rs) throws SQLException {
+        Student student = new Student();
+        student.setStudentId(rs.getString("student_id"));
+        student.setFullName(rs.getString("full_name"));
+        student.setDateOfBirth(rs.getDate("date_of_birth").toLocalDate());
+        student.setGender(rs.getString("gender"));
+        student.setPhone(rs.getString("phone"));
+        student.setEmail(rs.getString("email"));
+        String deptId = rs.getString("department_id");
+        if (!rs.wasNull()) {
+            student.setDepartmentId(deptId);
+        }
+        student.setEnrollmentDate(rs.getDate("enrollment_date").toLocalDate());
+        student.setGpa(rs.getDouble("gpa"));
+        return student;
+    }
+}
