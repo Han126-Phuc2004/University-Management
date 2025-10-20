@@ -62,7 +62,7 @@ public class MenuController {
         System.out.println("4. Quản lý Đăng ký môn học");
         System.out.println("5. Báo cáo và Thống kê");
         System.out.println("6. Đọc dữ liệu từ file CSV");
-        System.out.println("7. Lưu dữ liệu ra file CSV");
+        System.out.println("7. Mô phỏng đăng ký đa luồng");
         System.out.println("0. Thoát chương trình");
         System.out.println("=".repeat(50));
         System.out.print("Vui lòng chọn chức năng (0-7): ");
@@ -94,11 +94,14 @@ public class MenuController {
                 case 6:
                     handleImportData();
                     break;
+                case 7:
+                    handleSimulationMenu();
+                    break;
                 case 0:
                     isRunning = false;
                     break;
                 default:
-                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn từ 0-6.");
+                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn từ 0-7.");
             }
         } catch (NumberFormatException e) {
             System.out.println("Vui lòng nhập số nguyên!");
@@ -446,6 +449,134 @@ public class MenuController {
             System.out.println("Vui lòng nhập số nguyên!");
         }
         
+        System.out.println("\nNhấn Enter để quay lại menu chính...");
+        scanner.nextLine();
+    }
+
+    /**
+     * Xử lý menu mô phỏng đăng ký đa luồng
+     */
+    private void handleSimulationMenu() {
+        System.out.println("\n=== MÔ PHỎNG ĐĂNG KÝ ĐA LUỒNG ===");
+
+        // Kiểm tra xem có khóa học nào để mô phỏng không
+        java.util.List<entity.Course> availableCourses = courseService.getAllCourses();
+        if (availableCourses.isEmpty()) {
+            System.out.println("Chưa có khóa học nào trong hệ thống để mô phỏng. Vui lòng thêm khóa học trước.");
+            System.out.println("\nNhấn Enter để quay lại menu chính...");
+            scanner.nextLine();
+            return;
+        }
+
+        System.out.println("Danh sách khóa học có sẵn:");
+        courseService.listAllCourses(); // Hiển thị danh sách khóa học
+
+        System.out.print("\nNhập mã khóa học để mô phỏng: ");
+        String courseId = scanner.nextLine();
+
+        if (courseId.trim().isEmpty()) {
+            System.out.println("Mã khóa học không được để trống!");
+            return;
+        }
+
+        // Kiểm tra khóa học có tồn tại không
+        entity.Course course = courseService.getCourseById(courseId);
+        if (course == null) {
+            System.out.println("Không tìm thấy khóa học với mã: " + courseId);
+            return;
+        }
+
+        // Kiểm tra khóa học đã đầy chưa
+        if (courseService.isCourseFull(courseId)) {
+            System.out.println("⚠️  KHÓA HỌC ĐÃ ĐẦY!");
+            System.out.println("Khóa học '" + course.getCourseName() + "' đã đầy (" + 
+                             course.getEnrolledStudents() + "/" + course.getMaxStudents() + " sinh viên).");
+            System.out.println("Không thể mô phỏng đăng ký hay đăng ký thêm, vui lòng chọn khóa khác.");
+            System.out.println("\nNhấn Enter để quay lại menu chính...");
+            scanner.nextLine();
+            return;
+        }
+
+        // Hiển thị thông tin khóa học
+        System.out.println("✅ Khóa học: " + course.getCourseName());
+        System.out.println("📊 Số sinh viên hiện tại: " + course.getEnrolledStudents() + "/" + course.getMaxStudents());
+        System.out.println("🎯 Số chỗ trống còn lại: " + (course.getMaxStudents() - course.getEnrolledStudents()));
+
+        System.out.print("\nNhập số lượng sinh viên mô phỏng (mặc định 5): ");
+        String numStudentsStr = scanner.nextLine();
+        int numStudents = 5;
+        if (!numStudentsStr.trim().isEmpty()) {
+            try {
+                numStudents = Integer.parseInt(numStudentsStr);
+                if (numStudents <= 0) {
+                    System.out.println("Số lượng sinh viên phải lớn hơn 0!");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Số lượng không hợp lệ, sử dụng mặc định 5.");
+            }
+        }
+
+        // Chạy mô phỏng
+        runSimulation(courseId, numStudents);
+    }
+
+    /**
+     * Chạy mô phỏng đăng ký đa luồng
+     */
+    private void runSimulation(String courseId, int numStudents) {
+        System.out.println("\n=== BẮT ĐẦU MÔ PHỎNG ===");
+        System.out.println("Khóa học: " + courseService.getCourseById(courseId).getCourseName());
+        System.out.println("Mã khóa học: " + courseId);
+        System.out.println("Số sinh viên mô phỏng: " + numStudents);
+        System.out.println("------------------------------------");
+
+        java.util.List<Thread> threads = new java.util.ArrayList<>();
+        java.util.List<String> results = new java.util.ArrayList<>();
+
+        for (int i = 0; i < numStudents; i++) {
+            String studentName = "SinhVien_" + (i + 1);
+            Thread thread = new Thread(() -> {
+                System.out.printf("Người dùng '%s' đang cố gắng đăng ký môn học.%n", studentName);
+                String result = courseService.registerStudent(courseId, studentName);
+                System.out.printf("Người dùng '%s' đăng ký %s%n", studentName,
+                        "SUCCESS".equals(result) ? "thành công" : "thất bại");
+                synchronized (results) {
+                    results.add(studentName + ": " + result);
+                }
+            });
+            threads.add(thread);
+            thread.start();
+        }
+
+        // Đợi tất cả threads hoàn thành
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                System.err.println("Lỗi khi đợi thread: " + e.getMessage());
+            }
+        }
+
+        // Hiển thị kết quả
+        System.out.println("\n------------------------------------");
+        System.out.println("KẾT QUẢ MÔ PHỎNG:");
+        for (String result : results) {
+            System.out.println("  " + result);
+        }
+
+        // Hiển thị trạng thái cuối cùng - sử dụng CourseService để lấy dữ liệu
+        try {
+            entity.Course finalCourse = courseService.getCourseById(courseId);
+            if (finalCourse != null) {
+                System.out.println("\nTrạng thái cuối cùng:");
+                System.out.printf("  Số sinh viên đã đăng ký: %d/%d%n",
+                        finalCourse.getEnrolledStudents(), finalCourse.getMaxStudents());
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi khi lấy trạng thái cuối cùng: " + e.getMessage());
+        }
+
         System.out.println("\nNhấn Enter để quay lại menu chính...");
         scanner.nextLine();
     }
