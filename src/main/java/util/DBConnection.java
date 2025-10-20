@@ -6,15 +6,13 @@ import java.sql.SQLException;
 
 /**
  * Utility class để quản lý kết nối database
- * Sử dụng Singleton pattern để đảm bảo chỉ có một connection
+ * Tạo connection mới cho mỗi request để an toàn khi đa luồng
  */
 public class DBConnection {
     private static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=university_management;encrypt=false;trustServerCertificate=true";
     private static final String USERNAME = "sa";
-    private static final String PASSWORD = "sa123";
+    private static final String PASSWORD = "123456789";
     private static final String DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-
-    private static Connection connection = null;
 
     static {
         try {
@@ -25,34 +23,25 @@ public class DBConnection {
     }
 
     /**
-     * Lấy connection từ database
+     * Lấy connection mới từ database
      *
      * @return Connection object
      */
     public static Connection getConnection() {
         try {
-            if (connection == null || connection.isClosed()) {
-                connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-                System.out.println("Kết nối database thành công!");
-            }
+            return DriverManager.getConnection(URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
             System.err.println("Lỗi kết nối database: " + e.getMessage());
+            return null;
         }
-        return connection;
     }
 
     /**
-     * Đóng connection
+     * Đóng connection (không cần thiết vì mỗi connection được tự động đóng với try-with-resources)
      */
     public static void closeConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-                System.out.println("Đã đóng kết nối database!");
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi đóng kết nối database: " + e.getMessage());
-        }
+        // Không cần thiết vì mỗi connection được tự động đóng với try-with-resources
+        // System.out.println("Connection được tự động đóng với try-with-resources!");
     }
 
 }

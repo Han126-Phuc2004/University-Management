@@ -503,4 +503,99 @@ public class CourseService {
             }
         }
     }
+
+    /**
+     * Lấy tất cả khóa học
+     */
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll();
+    }
+
+    /**
+     * Lấy khóa học theo ID
+     */
+    public Course getCourseById(String courseId) {
+        return courseRepository.findById(courseId);
+    }
+
+    /**
+     * Kiểm tra khóa học có đầy không
+     */
+    public boolean isCourseFull(String courseId) {
+        Course course = courseRepository.findById(courseId);
+        if (course == null) {
+            return false; // Không tồn tại thì không đầy
+        }
+        return course.getEnrolledStudents() >= course.getMaxStudents();
+    }
+
+    /**
+     * Đăng ký sinh viên vào khóa học (được gọi từ mô phỏng)
+     */
+    public String registerStudent(String courseId, String studentName) {
+        // Retry mechanism với 3 lần thử
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                // Lấy course từ database để có dữ liệu mới nhất (chủ yếu để hiển thị tên)
+                Course course = courseRepository.findById(courseId);
+                if (course == null) {
+                    if (attempt < 3) {
+                        Thread.sleep(100); // Đợi 100ms trước khi thử lại
+                        continue;
+                    }
+                    return "FAIL: Course not found";
+                }
+
+                // Kiểm tra và cập nhật trong một transaction (atomic operation)
+                // Chỉ tăng enrolled_students nếu vẫn còn chỗ
+                String checkAndUpdateSql = "UPDATE course SET enrolled_students = enrolled_students + 1 WHERE course_id = ? AND enrolled_students < max_students";
+
+                try (var connection = DBConnection.getConnection();
+                     var pstmt = connection.prepareStatement(checkAndUpdateSql)) {
+                    if (connection == null) {
+                        if (attempt < 3) {
+                            Thread.sleep(100);
+                            continue;
+                        }
+                        return "FAIL: Cannot connect to database";
+                    }
+
+                    pstmt.setString(1, courseId);
+                    int rowsUpdated = pstmt.executeUpdate();
+
+                    if (rowsUpdated > 0) {
+                        // Cập nhật thành công, lưu thông tin đăng ký vào bảng enrollment
+                        boolean enrollmentSuccess = courseRepository.updateEnrollment(courseId, studentName);
+                        if (enrollmentSuccess) {
+                            return "SUCCESS";
+                        } else {
+                            // Nếu updateEnrollment thất bại, cần rollback enrolled_students
+                            // (Đây là trường hợp hiếm nếu logic updateEnrollment đã chặt chẽ)
+                            String rollbackSql = "UPDATE course SET enrolled_students = enrolled_students - 1 WHERE course_id = ?";
+                            try (var rollbackPstmt = connection.prepareStatement(rollbackSql)) {
+                                rollbackPstmt.setString(1, courseId);
+                                rollbackPstmt.executeUpdate();
+                            }
+                            return "FAIL: Enrollment record failed";
+                        }
+                    } else {
+                        // Không cập nhật được (đã đủ sinh viên)
+                        return "FAIL";
+                    }
+                }
+            } catch (Exception e) {
+                if (attempt < 3) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                    continue;
+                }
+                System.err.println("Lỗi khi đăng ký (attempt " + attempt + "): " + e.getMessage());
+                return "FAIL";
+            }
+        }
+        return "FAIL";
+    }
 }

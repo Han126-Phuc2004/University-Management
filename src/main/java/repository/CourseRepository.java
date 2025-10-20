@@ -186,121 +186,6 @@ System.err.println("Lỗi khi tìm khóa học theo giảng viên: " + e.getMess
     }
 
 
-    /**
-     * Thêm thông tin đăng ký vào bảng enrollment
-     * Tạo sinh viên mới cho mỗi simulation
-     */
-    public boolean updateEnrollment(String courseId, String studentName) {
-        // Retry mechanism với 3 lần thử
-        for (int attempt = 1; attempt <= 3; attempt++) {
-            try (var connection = DBConnection.getConnection()) {
-                if (connection == null) {
-                    if (attempt < 3) {
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                        continue;
-                    }
-                    return false;
-                }
-                
-                // Tạo sinh viên mới cho simulation
-                int studentId = createStudentForSimulation(connection, studentName);
-                if (studentId == -1) {
-                    if (attempt < 3) {
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                        continue;
-                    }
-                    return false;
-                }
-                
-                // Kiểm tra xem đã có enrollment cho student này và course này chưa
-                String checkSql = "SELECT COUNT(*) FROM enrollment WHERE student_id = ? AND course_id = ?";
-                try (PreparedStatement checkPstmt = connection.prepareStatement(checkSql)) {
-                    checkPstmt.setInt(1, studentId);
-                    checkPstmt.setString(2, courseId);
-                    try (var rs = checkPstmt.executeQuery()) {
-                        if (rs.next() && rs.getInt(1) > 0) {
-                            // Đã có enrollment cho student này và course này
-                            return true;
-                        }
-                    }
-                }
-                
-                // Thêm enrollment mới
-                String sql = "INSERT INTO enrollment (student_id, course_id) VALUES (?, ?)";
-                try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                    pstmt.setInt(1, studentId);
-                    pstmt.setString(2, courseId);
-                    return pstmt.executeUpdate() > 0;
-                }
-            } catch (SQLException e) {
-                if (attempt < 3) {
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                    }
-                    continue;
-                }
-                System.err.println("Lỗi khi cập nhật enrollment (attempt " + attempt + "): " + e.getMessage());
-                return false;
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Tạo sinh viên mới cho simulation
-     */
-    private int createStudentForSimulation(Connection connection, String studentName) {
-        try {
-            // Tạo email unique cho simulation
-            String email = studentName.toLowerCase().replace(" ", "") + "_simulation@student.edu.vn";
-            
-            // Kiểm tra xem sinh viên đã tồn tại chưa
-            String checkSql = "SELECT student_id FROM student WHERE email = ?";
-            try (PreparedStatement checkPstmt = connection.prepareStatement(checkSql)) {
-                checkPstmt.setString(1, email);
-                try (var rs = checkPstmt.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt("student_id");
-                    }
-                }
-            }
-            
-            // Tạo sinh viên mới
-            String insertSql = "INSERT INTO student (full_name, date_of_birth, gender, phone, email, department_id, enrollment_date, gpa) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            try (PreparedStatement pstmt = connection.prepareStatement(insertSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                pstmt.setString(1, studentName);
-                pstmt.setDate(2, java.sql.Date.valueOf("2000-01-01")); // Ngày sinh mặc định
-                pstmt.setString(3, "Male"); // Giới tính mặc định
-                pstmt.setString(4, "0123456789"); // Số điện thoại mặc định
-                pstmt.setString(5, email);
-                pstmt.setString(6, "SE"); // Khoa mặc định
-                pstmt.setDate(7, java.sql.Date.valueOf("2024-09-01")); // Ngày nhập học mặc định
-                pstmt.setBigDecimal(8, java.math.BigDecimal.valueOf(3.5)); // GPA mặc định
-                
-                int rowsAffected = pstmt.executeUpdate();
-                if (rowsAffected > 0) {
-                    try (var generatedKeys = pstmt.getGeneratedKeys()) {
-                        if (generatedKeys.next()) {
-                            return generatedKeys.getInt(1);
-                        }
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi tạo sinh viên mới: " + e.getMessage());
-        }
-        return -1;
-    }
 
     private Course extractCourseFromResultSet(ResultSet rs) throws SQLException {
         return new Course(
@@ -414,5 +299,151 @@ System.err.println("Lỗi khi tìm khóa học theo giảng viên: " + e.getMess
         System.out.println("\nTesting deleteCourse:");
         boolean deleted = repo.deleteCourse("C001");
         System.out.println("Delete successful: " + deleted);
+    }
+
+    /**
+     * Thêm thông tin đăng ký vào bảng enrollment
+     * Tạo sinh viên mới cho mỗi simulation
+     */
+    public boolean updateEnrollment(String courseId, String studentName) {
+        // Retry mechanism với 3 lần thử
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try (var connection = DBConnection.getConnection()) {
+                if (connection == null) {
+                    if (attempt < 3) {
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                        continue;
+                    }
+                    return false;
+                }
+                
+                // Tạo sinh viên mới cho simulation (trả về student_id NVARCHAR)
+                String studentId = createStudentForSimulation(connection, studentName);
+                if (studentId == null) {
+                    if (attempt < 3) {
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                        continue;
+                    }
+                    return false;
+                }
+                
+                // Kiểm tra xem đã có enrollment cho student này và course này chưa
+                String checkSql = "SELECT COUNT(*) FROM enrollment WHERE student_id = ? AND course_id = ?";
+                try (PreparedStatement checkPstmt = connection.prepareStatement(checkSql)) {
+                    checkPstmt.setString(1, studentId);
+                    checkPstmt.setString(2, courseId);
+                    try (var rs = checkPstmt.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) > 0) {
+                            // Đã có enrollment cho student này và course này
+                            return true;
+                        }
+                    }
+                }
+                
+                // Thêm enrollment mới (yêu cầu enrollment_id NVARCHAR(20))
+                String sql = "INSERT INTO enrollment (enrollment_id, student_id, course_id) VALUES (?, ?, ?)";
+                try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                    pstmt.setString(1, generateEnrollmentId());
+                    pstmt.setString(2, studentId);
+                    pstmt.setString(3, courseId);
+                    return pstmt.executeUpdate() > 0;
+                }
+            } catch (SQLException e) {
+                if (attempt < 3) {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                    continue;
+                }
+                System.err.println("Lỗi khi cập nhật enrollment (attempt " + attempt + "): " + e.getMessage());
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Tạo sinh viên mới cho simulation
+     */
+    private String createStudentForSimulation(Connection connection, String studentName) {
+        // Retry mechanism for student ID generation and insertion
+        for (int attempt = 1; attempt <= 5; attempt++) { // Increased retry attempts
+            try {
+                String email = studentName.toLowerCase().replace(" ", "") + "_simulation_" + attempt + "@student.edu.vn"; // Make email more unique per attempt
+
+                // Kiểm tra xem sinh viên đã tồn tại chưa
+                String checkSql = "SELECT student_id FROM student WHERE email = ?";
+                try (PreparedStatement checkPstmt = connection.prepareStatement(checkSql)) {
+                    checkPstmt.setString(1, email);
+                    try (ResultSet rs = checkPstmt.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getString("student_id");
+                        }
+                    }
+                }
+
+                // Sinh student_id NVARCHAR(20) theo quy tắc đơn giản
+                String studentId = generateStudentId(studentName); // Generate a new ID for each attempt
+
+                // Tạo sinh viên mới (truyền student_id do PK không auto)
+                String insertSql = "INSERT INTO student (student_id, full_name, date_of_birth, gender, phone, email, department_id, enrollment_date, gpa) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                try (PreparedStatement pstmt = connection.prepareStatement(insertSql)) {
+                    pstmt.setString(1, studentId);
+                    pstmt.setString(2, studentName);
+                    pstmt.setDate(3, java.sql.Date.valueOf("2000-01-01")); // Ngày sinh mặc định
+                    pstmt.setString(4, "Male"); // Giới tính mặc định
+                    pstmt.setString(5, "0123456789"); // Số điện thoại mặc định
+                    pstmt.setString(6, email);
+                    pstmt.setString(7, "SE"); // Khoa mặc định
+                    pstmt.setDate(8, java.sql.Date.valueOf("2024-09-01")); // Ngày nhập học mặc định
+                    pstmt.setBigDecimal(9, java.math.BigDecimal.valueOf(3.5)); // GPA mặc định
+
+                    int rowsAffected = pstmt.executeUpdate();
+                    if (rowsAffected > 0) {
+                        return studentId;
+                    }
+                }
+            } catch (SQLException e) {
+                // Log the error but continue retrying for PK violation
+                System.err.println("Lỗi khi tạo sinh viên mới (attempt " + attempt + "): " + e.getMessage());
+                if (e.getMessage().contains("Violation of PRIMARY KEY constraint") || e.getMessage().contains("duplicate key")) {
+                    try {
+                        Thread.sleep(50 + (attempt * 10)); // Small delay before retrying
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                    continue; // Retry with a new ID
+                }
+                return null; // Other SQL errors are fatal
+            }
+        }
+        return null; // Failed after all retries
+    }
+
+    private String generateStudentId(String studentName) {
+        String prefix = "SIM";
+        String base = studentName.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+        if (base.length() > 8) base = base.substring(0, 8);
+        String randomHex = Long.toHexString(System.nanoTime() + (long)(Math.random() * 1000000)); // More random
+        String id = prefix + base + randomHex;
+        return id.length() <= 20 ? id : id.substring(0, 20);
+    }
+
+    private String generateEnrollmentId() {
+        String prefix = "ENR";
+        String time = Long.toHexString(System.nanoTime()); // Use nanoTime for higher uniqueness
+        String rand = String.valueOf((int)(Math.random() * 900) + 100);
+        String id = prefix + time + rand;
+        return id.length() <= 20 ? id : id.substring(0, 20);
     }
 }
