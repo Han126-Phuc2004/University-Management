@@ -1,0 +1,7 @@
+lecturer_id,full_name,date_of_birth,gender,phone,email,department_id,degree,specialization
+GV006,TS Nguyễn Hải Nam,12/08/1979,Male,0902000006,nam.nguyen@university.edu,SE,PhD,Machine Learning
+GV007,ThS Trần Mỹ Linh,18/02/1986,Female,0902000007,linh.tran@university.edu,SE,Master,Data Analytics
+GV008,TS Lý Quốc Phong,05/11/1981,Male,0902000008,phong.ly@university.edu,SE,PhD,Distributed Systems
+GV009,PGS.TS Phạm Thu Trang,09/04/1977,Female,0902000009,trang.pham@university.edu,SE,PhD,Database Systems
+GV010,ThS Vũ Đức Thịnh,27/09/1984,Male,0902000010,thinh.vu@university.edu,SE,Master,Software Architecture
+
