@@ -3,7 +3,7 @@ package entity;
 import java.time.LocalDate;
 
 public class Student {
-    private int studentId;
+    private String studentId;
     private String fullName;
     private LocalDate dateOfBirth;
     private String gender;
@@ -15,7 +15,7 @@ public class Student {
 
     public Student() {}
 
-    public Student(int studentId, String fullName, LocalDate dateOfBirth, String gender,
+    public Student(String studentId, String fullName, LocalDate dateOfBirth, String gender,
                    String phone, String email, Integer departmentId,
                    LocalDate enrollmentDate, double gpa) {
         this.studentId = studentId;
@@ -41,11 +41,11 @@ public class Student {
         this.gpa = gpa;
     }
 
-    public int getStudentId() {
+    public String getStudentId() {
         return studentId;
     }
 
-    public void setStudentId(int studentId) {
+    public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
 

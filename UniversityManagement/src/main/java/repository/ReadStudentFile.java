@@ -77,7 +77,7 @@ public class ReadStudentFile {
             double gpa = parseDouble(gpaStr);
 
             Student st = new Student(
-                    studentId,
+                    stuCode,
                     fullName,
                     dob,
                     gender,

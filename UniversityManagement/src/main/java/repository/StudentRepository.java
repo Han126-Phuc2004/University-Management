@@ -116,7 +116,7 @@ public class StudentRepository {
                 pstmt.setNull(6, Types.INTEGER);
             }
             pstmt.setDouble(7, student.getGpa());
-            pstmt.setInt(8, student.getStudentId());
+            pstmt.setString(8, student.getStudentId());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -166,7 +166,7 @@ public class StudentRepository {
 
     private Student mapToStudent(ResultSet rs) throws SQLException {
         Student student = new Student();
-        student.setStudentId(rs.getInt("student_id"));
+        student.setStudentId(rs.getString("student_id"));
         student.setFullName(rs.getString("full_name"));
         student.setDateOfBirth(rs.getDate("date_of_birth").toLocalDate());
         student.setGender(rs.getString("gender"));
