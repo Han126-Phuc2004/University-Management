@@ -64,26 +64,25 @@ public class StudentRepository {
     }
 
     public boolean addStudent(Student student) {
-    String sql = "INSERT INTO student (student_id, full_name, date_of_birth, gender, phone, email, department_id, enrollment_date, gpa) "
-               + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO student (student_id, full_name, date_of_birth, gender, phone, email, department_id, enrollment_date, gpa) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-        pstmt.setString(1, student.getStudentId());                     // student_id
-        pstmt.setString(2, student.getFullName());                      // full_name
-        pstmt.setDate(3, Date.valueOf(student.getDateOfBirth()));       // date_of_birth
-        pstmt.setString(4, student.getGender());                        // gender
-        pstmt.setString(5, student.getPhone());                         // phone
-        pstmt.setString(6, student.getEmail());                         // email
-        pstmt.setString(7, student.getDepartmentId());                  // department_id
-        pstmt.setDate(8, Date.valueOf(student.getEnrollmentDate()));    // enrollment_date
-        pstmt.setDouble(9, student.getGpa());                          // gpa
-        return pstmt.executeUpdate() > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, student.getStudentId());                     // student_id
+            pstmt.setString(2, student.getFullName());                      // full_name
+            pstmt.setDate(3, Date.valueOf(student.getDateOfBirth()));       // date_of_birth
+            pstmt.setString(4, student.getGender());                        // gender
+            pstmt.setString(5, student.getPhone());                         // phone
+            pstmt.setString(6, student.getEmail());                         // email
+            pstmt.setString(7, student.getDepartmentId());                  // department_id
+            pstmt.setDate(8, Date.valueOf(student.getEnrollmentDate()));    // enrollment_date
+            pstmt.setDouble(9, student.getGpa());                          // gpa
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
-    return false;
-}
-
 
     public Student findById(int id) {
         String sql = "SELECT * FROM student WHERE student_id = ?";
@@ -163,6 +162,24 @@ public class StudentRepository {
         return students;
     }
 
+    /**
+     * Kiểm tra xem student_id đã tồn tại trong database chưa
+     */
+    public boolean existsById(String studentId) {
+        String sql = "SELECT COUNT(*) FROM student WHERE student_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // true nếu có ít nhất 1 bản ghi
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Student mapToStudent(ResultSet rs) throws SQLException {
         Student student = new Student();
         student.setStudentId(rs.getString("student_id"));
@@ -181,13 +198,26 @@ public class StudentRepository {
     public void saveStudentFromCSVToBD(String filePath) {
         List<Student> students = ReadStudentFile.loadStudents(filePath);
         int successCount = 0;
+        int skippedCount = 0;
+
         for (Student student : students) {
+            // Nếu trùng ID → bỏ qua
+            if (existsById(student.getStudentId())) {
+                System.out.println("Bỏ qua: Student ID " + student.getStudentId() + " đã tồn tại trong DB.");
+                skippedCount++;
+                continue;
+            }
+
+            // Thêm mới nếu chưa tồn tại
             if (addStudent(student)) {
                 successCount++;
-
             }
         }
-        System.out.println("Đã lưu thành công " + successCount + "/" + students.size() + " student từ file CSV vào database.");
 
+        System.out.println("Import hoàn tất!");
+        System.out.println(" - Thêm mới: " + successCount + " sinh viên");
+        System.out.println(" - Bỏ qua (đã tồn tại): " + skippedCount + " sinh viên");
+        System.out.println(" - Tổng số dòng trong CSV: " + students.size());
     }
+
 }
