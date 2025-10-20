@@ -30,28 +30,28 @@ public class StudentRepository {
         return departments;
     }
 
-    public int getdepartmentidbyname(String name) {
+    public String getdepartmentidbyname(String name) {
         String sql = "SELECT department_id FROM department WHERE department_name = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, name);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("department_id");
+                    return rs.getString("department_id");
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1; // or throw exception
+        return null; // or throw exception
     }
 
-    public String getDepartmentNameById(Integer id) {
+    public String getDepartmentNameById(String id) {
         if (id == null) {
             return null;
         }
         String sql = "SELECT department_name FROM department WHERE department_id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
+            pstmt.setString(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getString("department_name");
@@ -64,27 +64,26 @@ public class StudentRepository {
     }
 
     public boolean addStudent(Student student) {
-        String sql = "INSERT INTO student (full_name, date_of_birth, gender, phone, email, department_id, enrollment_date, gpa) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, student.getFullName());
-            pstmt.setDate(2, Date.valueOf(student.getDateOfBirth()));
-            pstmt.setString(3, student.getGender());
-            pstmt.setString(4, student.getPhone());
-            pstmt.setString(5, student.getEmail());
-            if (student.getDepartmentId() != null) {
-                pstmt.setInt(6, student.getDepartmentId());
-            } else {
-                pstmt.setNull(6, Types.INTEGER);
-            }
-            pstmt.setDate(7, Date.valueOf(student.getEnrollmentDate()));
-            pstmt.setDouble(8, student.getGpa());
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+    String sql = "INSERT INTO student (student_id, full_name, date_of_birth, gender, phone, email, department_id, enrollment_date, gpa) "
+               + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setString(1, student.getStudentId());                     // student_id
+        pstmt.setString(2, student.getFullName());                      // full_name
+        pstmt.setDate(3, Date.valueOf(student.getDateOfBirth()));       // date_of_birth
+        pstmt.setString(4, student.getGender());                        // gender
+        pstmt.setString(5, student.getPhone());                         // phone
+        pstmt.setString(6, student.getEmail());                         // email
+        pstmt.setString(7, student.getDepartmentId());                  // department_id
+        pstmt.setDate(8, Date.valueOf(student.getEnrollmentDate()));    // enrollment_date
+        pstmt.setDouble(9, student.getGpa());                          // gpa
+        return pstmt.executeUpdate() > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return false;
+}
+
 
     public Student findById(int id) {
         String sql = "SELECT * FROM student WHERE student_id = ?";
@@ -111,7 +110,7 @@ public class StudentRepository {
             pstmt.setString(4, student.getPhone());
             pstmt.setString(5, student.getEmail());
             if (student.getDepartmentId() != null) {
-                pstmt.setInt(6, student.getDepartmentId());
+                pstmt.setString(6, student.getDepartmentId());
             } else {
                 pstmt.setNull(6, Types.INTEGER);
             }
@@ -172,10 +171,8 @@ public class StudentRepository {
         student.setGender(rs.getString("gender"));
         student.setPhone(rs.getString("phone"));
         student.setEmail(rs.getString("email"));
-        int deptId = rs.getInt("department_id");
-        if (!rs.wasNull()) {
-            student.setDepartmentId(deptId);
-        }
+        student.setDepartmentId("department_id");
+
         student.setEnrollmentDate(rs.getDate("enrollment_date").toLocalDate());
         student.setGpa(rs.getDouble("gpa"));
         return student;

@@ -12,24 +12,6 @@ public class ReadStudentFile {
 
     private static final DateTimeFormatter DMY = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private static int mapDepartment(String depCode) {
-        if (depCode == null) {
-            return 0;
-        }
-        switch (depCode.trim().toUpperCase()) {
-            case "SE":
-                return 1;
-            case "AI":
-                return 2;
-            case "BA":
-                return 3;
-            case "IT":
-                return 4;
-            default:
-                return 0;
-        }
-    }
-
     private static LocalDate parseDate(String s) {
         try {
             return LocalDate.parse(s.trim(), DMY);
@@ -60,7 +42,7 @@ public class ReadStudentFile {
                 continue;
             }
 
-            String stuCode = cols[0]; // "DE180106"
+            String studentId = cols[0]; // "DE180106"
             String fullName = cols[1];
             String dobStr = cols[2];
             String gender = cols[3];
@@ -70,23 +52,22 @@ public class ReadStudentFile {
             String enrollStr = cols[8];
             String gpaStr = cols[10];
 
-            int studentId = FileUtils.extractDigitsToInt(stuCode); // "DE180106" -> 180106
-            int departmentId = mapDepartment(depStr);
             LocalDate dob = parseDate(dobStr);
             LocalDate enroll = parseDate(enrollStr);
             double gpa = parseDouble(gpaStr);
 
             Student st = new Student(
-                    stuCode,
+                    studentId, // giá trị số tách từ code
                     fullName,
                     dob,
                     gender,
                     phone,
                     email,
-                    departmentId,
+                    depStr,
                     enroll,
                     gpa
             );
+
             list.add(st);
         }
         return list;

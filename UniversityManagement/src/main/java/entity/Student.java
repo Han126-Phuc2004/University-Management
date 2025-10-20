@@ -3,24 +3,26 @@ package entity;
 import java.time.LocalDate;
 
 public class Student {
+
     private String studentId;
     private String fullName;
     private LocalDate dateOfBirth;
     private String gender;
     private String phone;
     private String email;
-    private Integer departmentId;
+    private String departmentId;
     private LocalDate enrollmentDate;
     private double gpa;
 
-    public Student() {}
+    public Student() {
+    }
 
-    public Student(String studentId, String fullName, LocalDate dateOfBirth, String gender,
-                   String phone, String email, Integer departmentId,
-                   LocalDate enrollmentDate, double gpa) {
+    public Student(String studentId, String fullName, LocalDate dob,
+            String gender, String phone, String email, String departmentId,
+            LocalDate enrollmentDate, double gpa) {
         this.studentId = studentId;
         this.fullName = fullName;
-        this.dateOfBirth = dateOfBirth;
+        this.dateOfBirth = dob;
         this.gender = gender;
         this.phone = phone;
         this.email = email;
@@ -28,9 +30,10 @@ public class Student {
         this.enrollmentDate = enrollmentDate;
         this.gpa = gpa;
     }
+
     public Student(String fullName, LocalDate dateOfBirth, String gender,
-                   String phone, String email, Integer departmentId,
-                   LocalDate enrollmentDate, double gpa) {
+            String phone, String email, String departmentId,
+            LocalDate enrollmentDate, double gpa) {
         this.fullName = fullName;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
@@ -89,11 +92,11 @@ public class Student {
         this.email = email;
     }
 
-    public Integer getDepartmentId() {
+    public String getDepartmentId() {
         return departmentId;
     }
 
-    public void setDepartmentId(Integer departmentId) {
+    public void setDepartmentId(String departmentId) {
         this.departmentId = departmentId;
     }
 
@@ -111,17 +114,17 @@ public class Student {
 
     @Override
     public String toString() {
-        return "Student{" +
-                "studentId=" + studentId +
-                ", fullName='" + fullName + '\'' +
-                ", dateOfBirth=" + dateOfBirth +
-                ", gender='" + gender + '\'' +
-                ", phone='" + phone + '\'' +
-                ", email='" + email + '\'' +
-                ", departmentId=" + departmentId +
-                ", enrollmentDate=" + enrollmentDate +
-                ", gpa=" + gpa +
-                '}';
+        return "Student{"
+                + "studentId=" + studentId
+                + ", fullName='" + fullName + '\''
+                + ", dateOfBirth=" + dateOfBirth
+                + ", gender='" + gender + '\''
+                + ", phone='" + phone + '\''
+                + ", email='" + email + '\''
+                + ", departmentId=" + departmentId
+                + ", enrollmentDate=" + enrollmentDate
+                + ", gpa=" + gpa
+                + '}';
     }
 
     public void setGpa(double gpa) {

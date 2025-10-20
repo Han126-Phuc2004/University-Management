@@ -26,7 +26,7 @@ public class StudentService {
     /**
      * Lấy ID khoa hợp lệ
      */
-    public int getDepartmentId() {
+    public String getDepartmentId() {
         while (true) {
             System.out.println("Danh sách các khoa:");
             List<String> departments = studentRepository.getDepartment();
@@ -56,7 +56,7 @@ public class StudentService {
 
         String email = getValidInput("Nhập email: ", InputValidator::isValidEmail);
 
-        int departmentId = getDepartmentId();
+        String departmentId = getDepartmentId();
 
         LocalDate enrollmentDate = LocalDate.now();
 
@@ -210,7 +210,7 @@ public class StudentService {
         if (!InputValidator.isEmpty(deptName)) {
             List<String> departments = studentRepository.getDepartment();
             if (departments.contains(deptName)) {
-                int deptId = studentRepository.getdepartmentidbyname(deptName);
+                String deptId = studentRepository.getdepartmentidbyname(deptName);
                 student.setDepartmentId(deptId);
             } else {
                 System.out.println("Tên khoa không hợp lệ, giữ nguyên.");

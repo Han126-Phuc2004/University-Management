@@ -6,6 +6,9 @@ import service.CourseService;
 //import service.EnrollmentService;
 import util.DBConnection;
 import util.FileUtils;
+import repository.StudentRepository;
+import repository.LecturerRepository;
+import repository.CourseRepository;
 
 import java.util.List;
 
@@ -327,9 +330,92 @@ public class MenuController {
      * Xử lý import dữ liệu từ CSV
      */
     private void handleImportData() {
+        while (true) {
+            System.out.println("\n" + "=".repeat(40));
+            System.out.println("      IMPORT DỮ LIỆU TỪ CSV");
+            System.out.println("=".repeat(40));
+            System.out.println("1. Import sinh viên (students.csv)");
+            System.out.println("2. Import giảng viên (lecturers.csv)");
+            System.out.println("3. Import khóa học (courses.csv)");
+            System.out.println("4. Import tất cả (Students, Lecturers, Courses)");
+            System.out.println("0. Quay lại menu chính");
+            System.out.println("=".repeat(40));
+            System.out.print("Vui lòng chọn chức năng (0-4): ");
 
-        System.out.println("Chức năng này sẽ được triển khai trong phiên bản tiếp theo.");
-        System.out.println("Hiện tại bạn có thể sử dụng các chức năng thêm dữ liệu thủ công.");
-        System.out.println("(Dữ liệu chỉ mới đọc vào bộ nhớ, chưa lưu vào hệ thống. Bạn cần bổ sung logic lưu vào repository nếu muốn sử dụng tiếp.)");
+            String choiceStr = scanner.nextLine();
+            int choice;
+            try {
+                choice = Integer.parseInt(choiceStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Vui lòng nhập số nguyên!");
+                continue;
+            }
+
+            // Xác định đường dẫn mặc định tới thư mục data
+            String baseDir = System.getProperty("user.dir");
+            String studentCsv = baseDir + "/src/main/java/data/students.csv";
+            String lecturerCsv = baseDir + "/src/main/java/data/lecturers.csv";
+            String courseCsv = baseDir + "/src/main/java/data/courses.csv";
+
+            switch (choice) {
+                case 1: {
+                    System.out.println("\n=== IMPORT STUDENTS ===");
+                    if (!FileUtils.fileExists(studentCsv)) {
+                        System.out.println("Không tìm thấy file: " + studentCsv);
+                        break;
+                    }
+                    new StudentRepository().saveStudentFromCSVToBD(studentCsv);
+                    break;
+                }
+                case 2: {
+                    System.out.println("\n=== IMPORT LECTURERS ===");
+                    if (!FileUtils.fileExists(lecturerCsv)) {
+                        System.out.println("Không tìm thấy file: " + lecturerCsv);
+                        break;
+                    }
+                    new LecturerRepository().saveLecturerFromCSVToBD(lecturerCsv);
+                    break;
+                }
+                case 3: {
+                    System.out.println("\n=== IMPORT COURSES ===");
+                    if (!FileUtils.fileExists(courseCsv)) {
+                        System.out.println("Không tìm thấy file: " + courseCsv);
+                        break;
+                    }
+                    new CourseRepository().saveCourseFromCSVToBD(courseCsv);
+                    break;
+                }
+                case 4: {
+                    System.out.println("\n=== IMPORT ALL (Students, Lecturers, Courses) ===");
+                    boolean hasAny = false;
+                    if (FileUtils.fileExists(studentCsv)) {
+                        new StudentRepository().saveStudentFromCSVToBD(studentCsv);
+                        hasAny = true;
+                    } else {
+                        System.out.println("Không tìm thấy file: " + studentCsv);
+                    }
+                    if (FileUtils.fileExists(lecturerCsv)) {
+                        new LecturerRepository().saveLecturerFromCSVToBD(lecturerCsv);
+                        hasAny = true;
+                    } else {
+                        System.out.println("Không tìm thấy file: " + lecturerCsv);
+                    }
+                    if (FileUtils.fileExists(courseCsv)) {
+                        new CourseRepository().saveCourseFromCSVToBD(courseCsv);
+                        hasAny = true;
+                    } else {
+                        System.out.println("Không tìm thấy file: " + courseCsv);
+                    }
+                    if (!hasAny) {
+                        System.out.println("Không có file CSV nào để import trong thư mục data.");
+                    }
+                    break;
+                }
+                case 0:
+                    return;
+                default:
+                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn từ 0-4.");
+            }
+        }
     }
 }
