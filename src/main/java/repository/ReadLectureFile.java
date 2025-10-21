@@ -14,24 +14,6 @@ public class ReadLectureFile {
     // dd/MM/yyyy theo dữ liệu bạn cung cấp (01/09/2012, ...)
     private static final DateTimeFormatter DMY = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private static String mapDepartment(String depCode) {
-        if (depCode == null) {
-            return null;
-        }
-        switch (depCode.trim().toUpperCase()) {
-            case "SE":
-                return "SE";
-            case "AI":
-                return "AI";
-            case "IB":
-                return "IB";
-            case "IT":
-                return "IT";
-            default:
-                return null;
-        }
-    }
-
     private static LocalDate parseDate(String s) {
         try {
             return LocalDate.parse(s.trim(), DMY);
@@ -65,7 +47,6 @@ public class ReadLectureFile {
             String depStr = cols[6];
             String degree = cols[7];
             String specialization = cols[8];
-            String departmentId = mapDepartment(depStr);
             LocalDate dob = parseDate(dobStr);
 
             Lecturer lec = new Lecturer(
@@ -75,7 +56,7 @@ public class ReadLectureFile {
                     gender,
                     phone,
                     email,
-                    departmentId,
+                    depStr,
                     degree,
                     specialization
             );
@@ -93,12 +74,12 @@ public class ReadLectureFile {
         List<String[]> rows = FileUtils.readCSV(filePath);
         return parseLecturers(rows);
     }
-    
+
     public static void printLecturers(List<Lecturer> lecturers) {
         System.out.println("=== LECTURER DATA ===");
         System.out.println("Total lecturers: " + lecturers.size());
-        lecturers.stream().limit(50).forEach(l ->
-                System.out.println(
+        lecturers.stream().limit(50).forEach(l
+                -> System.out.println(
                         l.getLecturerId() + " | " + l.getFullName()
                         + " | dob=" + l.getDateOfBirth()
                         + " | gender=" + l.getGender()

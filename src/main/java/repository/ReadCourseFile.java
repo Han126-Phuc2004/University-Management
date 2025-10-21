@@ -9,24 +9,6 @@ import java.util.List;
 
 public class ReadCourseFile {
 
-    private static String mapDepartment(String depCode) {
-        if (depCode == null) {
-            return null;
-        }
-        switch (depCode.trim().toUpperCase()) {
-            case "SE":
-                return "SE";
-            case "AI":
-                return "AI";
-            case "IB":
-                return "IB";
-            case "IT":
-                return "IT";
-            default:
-                return null;
-        }
-    }
-
     /**
      * CSV rows -> List<Course> (dùng các cột đúng thứ tự file bạn đưa)
      */
@@ -51,7 +33,7 @@ public class ReadCourseFile {
             String description = safe(cols, 2);               // Mô tả
             int credits = parseInt(safe(cols, 3), 0);  // Số tín chỉ
             String lecturerId = safe(cols, 4); // Giữ nguyên lecturer_id dạng string
-            String departmentId = mapDepartment(safe(cols, 5));                 // "SE" -> "SE"
+            String departmentId = safe(cols, 5);                
             // semester_id trong CSV là chuỗi kiểu "SEMTEST" -> entity của bạn là String, nên để null
             String semesterId = null;
             int maxStudents = parseInt(safe(cols, 7), 50);

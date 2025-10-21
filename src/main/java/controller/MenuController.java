@@ -8,6 +8,7 @@ import util.FileUtils;
 import repository.StudentRepository;
 import repository.LecturerRepository;
 import repository.CourseRepository;
+import service.EnrollmentService;
 /*import controller.ReportController;*/
 
 import java.util.Scanner;
@@ -20,6 +21,7 @@ public class MenuController {
     private StudentService studentService;
     private LecturerService lecturerService;
     private CourseService courseService;
+    private EnrollmentService enrollmentService;
     private Scanner scanner;
     private boolean isRunning;
 
@@ -27,6 +29,7 @@ public class MenuController {
         this.studentService = new StudentService();
         this.lecturerService = new LecturerService();
         this.courseService = new CourseService();
+        this.enrollmentService = new EnrollmentService();
         this.scanner = new Scanner(System.in);
         this.isRunning = true;
     }
@@ -85,9 +88,9 @@ public class MenuController {
                 case 3:
                     handleCourseMenu();
                     break;
-               // case 4:
-                  //  handleEnrollmentMenu();
-                   // break;
+               case 4:
+                   handleEnrollmentMenu();
+                   break;
                // case 5:
                   //  handleReportMenu();
                   //  break;
@@ -356,13 +359,91 @@ public class MenuController {
     /**
      * Xử lý menu quản lý đăng ký môn học
      */
+    
     private void handleEnrollmentMenu() {
-        System.out.println("\n" + "=".repeat(40));
-        System.out.println("   QUẢN LÝ ĐĂNG KÝ MÔN HỌC");
-        System.out.println("=".repeat(40));
-        System.out.println("Chức năng này đang được phát triển...");
-        System.out.println("Nhấn Enter để quay lại menu chính...");
-        scanner.nextLine();
+        while (true) {
+            System.out.println("\n=== ENROLLMENT MANAGEMENT ===");
+            System.out.println("1. Register for a course");
+            System.out.println("2. Cancel course enrollment");
+            System.out.println("3. View student's enrolled courses");
+            System.out.println("4. View course enrollments");
+            System.out.println("5. View all enrollments");
+            System.out.println("6. Update enrollment scores");
+            System.out.println("7. Update enrollment status");
+            System.out.println("0. Back to main menu");
+            System.out.print("Please choose an option (0-7): ");
+            String choice = scanner.nextLine();
+
+            if (choice.equals("0")) break;
+
+            switch (choice) {
+                case "1":
+                    System.out.print("Enter Student ID: ");
+                    String studentId = scanner.nextLine();
+                    courseService.listAllCourses(); 
+                    System.out.print("Enter Course ID: ");
+                    String courseId = scanner.nextLine();
+                    enrollmentService.registerCourse(studentId, courseId);
+                    break;
+                case "2":
+                    System.out.print("Enter Student ID: ");
+                    studentId = scanner.nextLine();
+                    System.out.print("Enter Course ID: ");
+                    courseId = scanner.nextLine();
+                    enrollmentService.cancelEnrollment(studentId, courseId);
+                    break;
+                case "3":
+                    System.out.print("Enter Student ID: ");
+                    studentId = scanner.nextLine();
+                    enrollmentService.viewEnrollments(studentId);
+                    break;
+                case "4":
+                    System.out.print("Enter Course ID: ");
+                    courseId = scanner.nextLine();
+                    enrollmentService.viewCourseEnrollments(courseId);
+                    break;
+                case "5":
+                    enrollmentService.viewAllEnrollments();
+                    break;
+                case "6":
+                    handleUpdateScores();
+                    break;
+                case "7":
+                    handleUpdateStatus();
+                    break;
+                default:
+                    System.out.println("Invalid option! Please choose between 0-7.");
+            }
+        }
+    }
+
+    private void handleUpdateScores() {
+        System.out.print("Enter Enrollment ID: ");
+        String enrollmentId = scanner.nextLine();
+        
+        System.out.print("Enter Midterm Score (0-10): ");
+        String midtermInput = scanner.nextLine();
+        System.out.print("Enter Final Score (0-10): ");
+        String finalInput = scanner.nextLine();
+        
+        try {
+java.math.BigDecimal midtermScore = new java.math.BigDecimal(midtermInput);
+            java.math.BigDecimal finalScore = new java.math.BigDecimal(finalInput);
+            enrollmentService.updateScores(enrollmentId, midtermScore, finalScore);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid score format! Please enter valid numbers.");
+        }
+    }
+
+    private void handleUpdateStatus() {
+        System.out.print("Enter Enrollment ID: ");
+        String enrollmentId = scanner.nextLine();
+        
+        System.out.println("Available statuses: enrolled, completed, dropped, failed");
+        System.out.print("Enter new status: ");
+        String status = scanner.nextLine();
+        
+        enrollmentService.updateStatus(enrollmentId, status);
     }
 
     /**
