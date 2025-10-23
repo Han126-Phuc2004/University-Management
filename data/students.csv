@@ -1,0 +1,7 @@
+student_id,full_name,date_of_birth,gender,phone,email,address,department_id,enrollment_date,status,gpa
+DE180106,Phạm Minh Khoa,12/02/2003,Male,0912999006,PMK106@fpt.edu.vn,Số 6 - Tầng 2 - Tòa F,SE,07/10/2025,active,3.20
+DE180107,Đỗ Thị Lan,23/03/2004,Female,0912999007,DTL107@fpt.edu.vn,Số 7 - Tầng 3 - Tòa G,SE,07/10/2025,active,3.45
+DE180108,Ngô Văn Bình,05/04/2005,Male,0912999008,NVB108@fpt.edu.vn,Số 8 - Tầng 4 - Tòa H,SE,07/10/2025,active,3.10
+DE180109,Trịnh Thu Hà,19/05/2003,Female,0912999009,TTH109@fpt.edu.vn,Số 9 - Tầng 5 - Tòa I,SE,07/10/2025,active,3.70
+DE180110,Vũ Quang Huy,30/06/2002,Male,0912999010,VQH110@fpt.edu.vn,Số 10 - Tầng 6 - Tòa J,SE,07/10/2025,active,3.35
+

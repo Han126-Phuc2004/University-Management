@@ -1,0 +1,6 @@
+course_id,course_name,description,credits,lecturer_id,department_id,semester_id,max_students,enrolled_students,room,schedule,status
+PRN211,Lập trình .NET,Phát triển ứng dụng .NET,3,GV010,SE,SEMTEST,35,0,B202,T3-5 14:00-16:00,open
+WED201,Phát triển Web nâng cao,Backend + API,4,GV009,SE,SEMTEST,40,0,Lab03,T2-4 16:00-18:00,open
+SWE301,Kỹ nghệ phần mềm,Quy trình và mô hình,3,GV008,SE,SEMTEST,45,0,A104,T3-5 08:00-10:00,open
+DSA202,Giải thuật nâng cao,Thiết kế & phân tích giải thuật,4,GV007,SE,SEMTEST,30,0,A105,T5 13:00-17:00,open
+
