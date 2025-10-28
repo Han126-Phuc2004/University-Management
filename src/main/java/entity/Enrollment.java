@@ -44,6 +44,14 @@ public class Enrollment {
         this.grade = grade;
     }
 
+    public Enrollment(String enrollmentId, String studentId, String courseId, String status, String grade) {
+        this.enrollmentId = enrollmentId;
+        this.studentId = studentId;
+        this.courseId = courseId;
+        this.status = status;
+        this.grade = grade;
+    }
+
     // Getters
     public String getEnrollmentId() {
         return enrollmentId;

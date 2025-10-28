@@ -1,4 +1,5 @@
 entity\Course.class
+service\ReportGenerator.class
 util\InputValidator.class
 entity\Enrollment.class
 util\FileUtils.class

@@ -85,7 +85,7 @@ public class StudentRepository {
         return false;
     }
 
-    public Student findById(String id) {
+        public Student findById(String id) {
         String sql = "SELECT * FROM student WHERE student_id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, id);

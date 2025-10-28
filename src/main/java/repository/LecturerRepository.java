@@ -19,31 +19,31 @@ public class LecturerRepository {
     }
 
     /**
-     * Thêm giảng viên (kiểm tra trùng ID/email, tồn tại khoa)
+     * Thêm giảng viên
      */
-    public boolean addLecturer(Lecturer lecturer) {
-        if (lecturer == null) return false;
+    public boolean addLecturer(Lecturer lecturer){
+        if(lecturer == null) return false;
         if (existsById(lecturer.getLecturerId())) return false;
-        if (existsByEmail(lecturer.getEmail())) return false;
-        if (!departmentExists(lecturer.getDepartmentId())) return false;
+        if(existsByEmail(lecturer.getEmail())) return false;
+        if(!departmentExists(lecturer.getDepartmentId())) return  false;   
 
-        final String sql = "INSERT INTO lecturer (lecturer_id, full_name, date_of_birth, gender, phone, email, department_id, degree, specialization) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        final String sql = "INSERT INTO lecturer (lecturer_id, full_name, date_of_birth , gender, phone, email, department_id, degree, specialization) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try(PreparedStatement stmt = connection.prepareStatement(sql)){
             stmt.setString(1, lecturer.getLecturerId());
             stmt.setString(2, lecturer.getFullName());
-            stmt.setDate(3, Date.valueOf(lecturer.getDateOfBirth()));
+            stmt.setDate(3, Date.valueOf(lecturer.getDateOfBirth()));               
             stmt.setString(4, lecturer.getGender());
             stmt.setString(5, lecturer.getPhone());
             stmt.setString(6, lecturer.getEmail());
-            stmt.setString(7, lecturer.getDepartmentId());
+            stmt.setString(7, lecturer.getDepartmentId());  
             stmt.setString(8, lecturer.getDegree());
             stmt.setString(9, lecturer.getSpecialization());
             return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi thêm giảng viên: " + e.getMessage());
+        }catch (SQLException e){
+            System.out.println("Lỗi khi thêm giảng viên: " + e.getMessage());
             return false;
         }
-    }
+        }
 
     public boolean existsById(String lecturerId) {
         if (lecturerId == null) return false;
@@ -105,7 +105,7 @@ public class LecturerRepository {
 
     public boolean deleteLecturer(String lecturerId) {
         if (lecturerId == null) return false;
-        
+
         final String sql = "DELETE FROM lecturer WHERE lecturer_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, lecturerId);

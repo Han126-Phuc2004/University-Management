@@ -1,0 +1,3 @@
+enrollment_id,student_id,course_id,status,grade,midterm_score,final_score,total_score,enrollment_date
+E001,STU001,CS101,Active,A,8.5,9.0,8.75,2024-01-15
+E002,STU002,CS101,Active,B,7.0,8.0,7.5,2024-01-15

@@ -1,10 +1,18 @@
 package service;
 
+import entity.Course;
 import entity.Enrollment;
+import repository.CourseRepository;
 import repository.EnrollmentRepository;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Service class for managing student enrollments.
@@ -69,19 +77,19 @@ public class EnrollmentService {
             System.out.println("No enrollments found for student ID: " + studentId);
         } else {
             System.out.println("\n=== ENROLLMENTS FOR STUDENT ID: " + studentId + " ===");
-            System.out.printf("%-15s %-15s %-15s %-10s %-8s %-8s %-8s %-5s%n", 
-                "Course ID", "Enrollment Date", "Status", "Midterm", "Final", "Total", "Grade", "");
+            System.out.printf("%-15s %-15s %-15s %-10s %-8s %-8s %-8s %-5s%n",
+                    "Course ID", "Enrollment Date", "Status", "Midterm", "Final", "Total", "Grade", "");
             System.out.println("-".repeat(90));
             for (Enrollment enrollment : enrollments) {
-                System.out.printf("%-15s %-15s %-15s %-10s %-8s %-8s %-8s %-5s%n", 
-                    enrollment.getCourseId(), 
-                    enrollment.getEnrollmentDate(),
-                    enrollment.getStatus(),
-                    enrollment.getMidtermScore() != null ? enrollment.getMidtermScore() : "N/A",
-                    enrollment.getFinalScore() != null ? enrollment.getFinalScore() : "N/A",
-                    enrollment.getTotalScore() != null ? enrollment.getTotalScore() : "N/A",
-                    enrollment.getGrade() != null ? enrollment.getGrade() : "N/A",
-                    "");
+                System.out.printf("%-15s %-15s %-15s %-10s %-8s %-8s %-8s %-5s%n",
+                        enrollment.getCourseId(),
+                        enrollment.getEnrollmentDate(),
+                        enrollment.getStatus(),
+                        enrollment.getMidtermScore() != null ? enrollment.getMidtermScore() : "N/A",
+                        enrollment.getFinalScore() != null ? enrollment.getFinalScore() : "N/A",
+                        enrollment.getTotalScore() != null ? enrollment.getTotalScore() : "N/A",
+                        enrollment.getGrade() != null ? enrollment.getGrade() : "N/A",
+                        "");
             }
         }
     }
@@ -100,18 +108,18 @@ public class EnrollmentService {
             System.out.println("No enrollments found for course ID: " + courseId);
         } else {
             System.out.println("\n=== ENROLLMENTS FOR COURSE ID: " + courseId + " ===");
-            System.out.printf("%-15s %-15s %-15s %-10s %-8s %-8s %-8s %-5s%n", 
-                "Student ID", "Enrollment Date", "Status", "Midterm", "Final", "Total", "Grade");
+            System.out.printf("%-15s %-15s %-15s %-10s %-8s %-8s %-8s%n",
+                    "Student ID", "Enrollment Date", "Status", "Midterm", "Final", "Total", "Grade");
             System.out.println("-".repeat(90));
             for (Enrollment enrollment : enrollments) {
-                System.out.printf("%-15s %-15s %-15s %-10s %-8s %-8s %-8s %-5s%n", 
-                    enrollment.getStudentId(), 
-                    enrollment.getEnrollmentDate(),
-                    enrollment.getStatus(),
-                    enrollment.getMidtermScore() != null ? enrollment.getMidtermScore() : "N/A",
-                    enrollment.getFinalScore() != null ? enrollment.getFinalScore() : "N/A",
-                    enrollment.getTotalScore() != null ? enrollment.getTotalScore() : "N/A",
-                    enrollment.getGrade() != null ? enrollment.getGrade() : "N/A");
+                System.out.printf("%-15s %-15s %-15s %-10s %-8s %-8s %-8s%n",
+                        enrollment.getStudentId(),
+                        enrollment.getEnrollmentDate(),
+                        enrollment.getStatus(),
+                        enrollment.getMidtermScore() != null ? enrollment.getMidtermScore() : "N/A",
+                        enrollment.getFinalScore() != null ? enrollment.getFinalScore() : "N/A",
+                        enrollment.getTotalScore() != null ? enrollment.getTotalScore() : "N/A",
+                        enrollment.getGrade() != null ? enrollment.getGrade() : "N/A");
             }
         }
     }
@@ -131,7 +139,7 @@ public class EnrollmentService {
         }
 
         if (midtermScore.compareTo(BigDecimal.ZERO) < 0 || midtermScore.compareTo(BigDecimal.TEN) > 0 ||
-            finalScore.compareTo(BigDecimal.ZERO) < 0 || finalScore.compareTo(BigDecimal.TEN) > 0) {
+                finalScore.compareTo(BigDecimal.ZERO) < 0 || finalScore.compareTo(BigDecimal.TEN) > 0) {
             System.out.println("Scores must be between 0 and 10!");
             return;
         }
@@ -142,6 +150,42 @@ public class EnrollmentService {
             System.out.println("Failed to update scores. Check if enrollment exists.");
         }
     }
+
+    private static String safe(String[] arr, int idx) {
+        return (idx >= 0 && idx < arr.length && arr[idx] != null) ? arr[idx].trim() : "";
+    }
+
+    public ArrayList<Enrollment> readEnrollment(List<String[]> csvData) {
+        ArrayList<Enrollment> enrollments = new ArrayList<>();
+        int start = 0;
+        if (!csvData.isEmpty() && csvData.get(0).length > 0
+                && "enrollment_id".equalsIgnoreCase(csvData.get(0)[0])) {
+            start = 1;
+        }
+        for (int i = start; i < csvData.size(); i++) {
+            String[] cols = csvData.get(i);
+            if (cols.length < 9) {
+                continue;
+            }
+            String enrollmentId = safe(cols, 0);
+            String studentId = safe(cols, 1);
+            String courseId = safe(cols, 2);
+            String status = safe(cols, 3);
+            String grade = safe(cols, 4);
+
+            Enrollment e = new Enrollment(
+                    enrollmentId,
+                    studentId,
+                    courseId,
+                    status,
+                    grade
+            );
+            enrollments.add(e);
+        }
+        return  enrollments;
+
+    }
+
 
     /**
      * Update enrollment status
@@ -214,5 +258,13 @@ public class EnrollmentService {
             }
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+
+        String filePath = System.getProperty("user.dir") + "/data/Enroll.csv";
+        List<String[]> csvData =new ArrayList<>();
+
+
     }
 }
